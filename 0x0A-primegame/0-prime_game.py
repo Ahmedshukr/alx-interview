@@ -1,57 +1,59 @@
 #!/usr/bin/python3
-"""Module defining isWinner function."""
+""" 0-prime_game.py """
 
 
-def isWinner(x, nums):
-    """Function to get who has won in prime game"""
-    mariaWinsCount = 0
-    benWinsCount = 0
+def is_prime(num):
+    """ check for prime number"""
+    if num == 0 or num == 1 or (num % 2 == 0 and num > 2):
+        return False
+    else:
+        for i in range(3, int(num ** 0.5) + 2):
+            if num % i == 0:
+                return False
+        return True
 
-    for num in nums:
-        roundsSet = list(range(1, num + 1))
-        primesSet = primes_in_range(1, num)
 
-        if not primesSet:
-            benWinsCount += 1
-            continue
+def is_round_winner(n, x):
+    """ checks the round winner """
+    list = [i for i in range(1, n + 1)]
+    players = ['Maria', 'Ben']
 
-        isMariaTurns = True
+    for i in range(n):
+        current_player = players[i % 2]
+        nums_selected = []
+        prime = -1
+        for idx, num in enumerate(list):
+            if prime != -1:
+                if num % prime == 0:
+                    nums_selected.append(idx)
+            else:
+                if is_prime(num):
+                    nums_selected.append(idx)
+                    prime = num
 
-        while(True):
-            if not primesSet:
-                if isMariaTurns:
-                    benWinsCount += 1
-                else:
-                    mariaWinsCount += 1
-                break
-
-            smallestPrime = primesSet.pop(0)
-            roundsSet.remove(smallestPrime)
-
-            roundsSet = [x for x in roundsSet if x % smallestPrime != 0]
-
-            isMariaTurns = not isMariaTurns
-
-    if mariaWinsCount > benWinsCount:
-        return "Winner: Maria"
-
-    if mariaWinsCount < benWinsCount:
-        return "Winner: Ben"
-
+        if prime == -1:
+            if current_player == players[0]:
+                return players[1]
+            else:
+                return players[0]
+        else:
+            for i, val in enumerate(nums_selected):
+                del list[val - i]
     return None
 
 
-def is_prime(n):
-    """Returns True if n is prime, else False."""
-    if n < 2:
-        return False
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
+def isWinner(x, nums):
+    """ returns the winner """
+    counter = {'Maria': 0, 'Ben': 0}
 
+    for i in range(x):
+        round_winner = is_round_winner(nums[i], x)
+        if round_winner is not None:
+            counter[round_winner] += 1
 
-def primes_in_range(start, end):
-    """Returns a list of prime numbers between start and end (inclusive)."""
-    primes = [n for n in range(start, end+1) if is_prime(n)]
-    return primes
+    if counter['Maria'] > counter['Ben']:
+        return 'Maria'
+    elif counter['Ben'] > counter['Maria']:
+        return 'Ben'
+    else:
+        return None
